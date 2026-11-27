@@ -314,6 +314,9 @@ export default function App() {
           .replace('{base}', FILES_BASE)
           .replace('{page:04d}', padded)
       : thumbUrl
+  // عند توفّر مخزن الصور الكاملة (Archive أو R2) نستخدم الصورة الأصلية حتى عند 100%
+  // حتى يظهر المتن واضحاً بدل الصورة المصغّرة؛ المصغّرة تبقى للوضع الافتراضي بدون مخزن.
+  const pageImageUrl = FILES_BASE ? fullUrl : thumbUrl
   const volumeNumber = /^v(\d+)$/.exec(detail?.id ?? '')?.[1]
   const downloadUrl = detail
     ? ORIGINAL_BASE
@@ -769,7 +772,7 @@ export default function App() {
                       setDraftHighlight(null)
                     }}
                   >
-                    <img src={zoom > 1 ? fullUrl : thumbUrl} alt={`صفحة ${page} من ${detail.title}`} draggable={false} />
+                    <img src={pageImageUrl} alt={`صفحة ${page} من ${detail.title}`} draggable={false} />
                     <div className="highlight-overlay">
                       {currentHighlights.map((item) => (
                         <button
@@ -790,7 +793,7 @@ export default function App() {
                       )}
                     </div>
                     {zoom > 1 && !FILES_BASE && (
-                      <div className="zoom-hint">الصورة المصغّرة معروضة؛ اضبط VITE_FILES_BASE للصور الكاملة.</div>
+                      <div className="zoom-hint">الصورة المصغّرة معروضة؛ اضبط VITE_FILES_BASE لعرض الصور الكاملة.</div>
                     )}
                   </div>
                 ) : (
