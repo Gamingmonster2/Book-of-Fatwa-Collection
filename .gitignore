@@ -2,7 +2,7 @@ node_modules/
 dist/
 .venv/
 build/
-data/
+/data/
 tsconfig.tsbuildinfo
 *.pyc
 __pycache__/

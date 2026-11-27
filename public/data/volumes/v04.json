@@ -1,0 +1,29 @@
+{
+  "id": "v04",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 4 : مفصل الاعتقاد",
+  "file": "04_70717-2.pdf",
+  "pages": 342,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموعة الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الرابع",
+      "page": 1
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 333
+    }
+  ],
+  "indexStart": 333,
+  "indexEnd": 342,
+  "imagePattern": {
+    "thumb": "/files/v04/thumbs/p{page:04d}.webp",
+    "full": "{base}/v04/full/p{page:04d}.webp"
+  }
+}

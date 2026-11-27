@@ -1,0 +1,49 @@
+{
+  "id": "v06",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 6: الأسماء والصفات 2",
+  "file": "06_70718-2.pdf",
+  "pages": 366,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموعة الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء السادس",
+      "page": 1
+    },
+    {
+      "level": 3,
+      "title": "فصل",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "الرسالة المدنية في الحقيقة والمجاز في الصفات",
+      "page": 211
+    },
+    {
+      "level": 3,
+      "title": "رسالته إلى أهل البحرين",
+      "page": 291
+    },
+    {
+      "level": 3,
+      "title": "الرسالة العرشية",
+      "page": 326
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 361
+    }
+  ],
+  "indexStart": 361,
+  "indexEnd": 366,
+  "imagePattern": {
+    "thumb": "/files/v06/thumbs/p{page:04d}.webp",
+    "full": "{base}/v06/full/p{page:04d}.webp"
+  }
+}

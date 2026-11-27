@@ -1,0 +1,44 @@
+{
+  "id": "v03",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 3 : مجمل اعتقاد السلف",
+  "file": "03_70717-1.pdf",
+  "pages": 272,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموعة الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الثالث",
+      "page": 1
+    },
+    {
+      "level": 3,
+      "title": "الرسالة التدمرية",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "العقيدة الواسطية",
+      "page": 87
+    },
+    {
+      "level": 3,
+      "title": "مناظرة في العقيدة الواسطية",
+      "page": 106
+    },
+    {
+      "level": 3,
+      "title": "الفهرس",
+      "page": 265
+    }
+  ],
+  "indexStart": 265,
+  "indexEnd": 272,
+  "imagePattern": {
+    "thumb": "/files/v03/thumbs/p{page:04d}.webp",
+    "full": "{base}/v03/full/p{page:04d}.webp"
+  }
+}

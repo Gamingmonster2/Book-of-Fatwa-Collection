@@ -1,0 +1,29 @@
+{
+  "id": "v08",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 8",
+  "file": "08_70719-2.pdf",
+  "pages": 335,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموعة الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الثامن",
+      "page": 1
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 327
+    }
+  ],
+  "indexStart": 327,
+  "indexEnd": 335,
+  "imagePattern": {
+    "thumb": "/files/v08/thumbs/p{page:04d}.webp",
+    "full": "{base}/v08/full/p{page:04d}.webp"
+  }
+}

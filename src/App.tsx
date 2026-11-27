@@ -36,6 +36,8 @@ type SearchHit = {
 
 const FILES_BASE = (import.meta.env.VITE_FILES_BASE as string | undefined)?.replace(/\/$/, '')
 const ORIGINAL_BASE = (import.meta.env.VITE_ORIGINAL_BASE as string | undefined)?.replace(/\/$/, '')
+// النسخة المفتوحة على Internet Archive (ملفات mftNN.pdf مطابقة للملفات الأصلية)
+const ARCHIVE_DOWNLOAD_BASE = 'https://archive.org/download/mft37'
 
 function assetUrl(path: string): string {
   return new URL(path.replace(/^\/+/, ''), document.baseURI).href
@@ -63,7 +65,8 @@ export default function App() {
   const [manifest, setManifest] = useState<Manifest | null>(null)
   const [volumeId, setVolumeId] = useState(() => initialParam('v', 'v01'))
   const [detail, setDetail] = useState<VolumeDetail | null>(null)
-  const [ocr, setOcr] = useState<OcrIndex | null>(null)
+  const [prepared, setPrepared] = useState<string[]>([])
+  const [allOcr, setAllOcr] = useState<OcrIndex[]>([])
   const [page, setPage] = useState(() => Number(initialParam('p', '1')) || 1)
   const [query, setQuery] = useState(() => initialParam('q', ''))
   const [zoom, setZoom] = useState(1)
@@ -78,9 +81,27 @@ export default function App() {
       .catch(() => setError('تعذّر تحميل بيانات المجلدات'))
   }, [])
 
+  // البحث في فهارس كل المجلدات المجهّزة، لا المجلد الحالي فقط.
+  useEffect(() => {
+    fetch(assetUrl('data/prepared.json'))
+      .then((response) => (response.ok ? response.json() : []))
+      .then((ids: string[]) => {
+        setPrepared(ids)
+        return Promise.all(
+          ids.map((id) =>
+            fetch(assetUrl(`data/ocr/${id}-index.json`))
+              .then((response) => (response.ok ? response.json() : null))
+              .catch(() => null),
+          ),
+        )
+      })
+      .then((items) => setAllOcr(items.filter((item): item is OcrIndex => !!item)))
+      .catch(() => setAllOcr([]))
+  }, [])
+
   useEffect(() => {
     setDetail(null)
-    setOcr(null)
+    setError('')
     fetch(assetUrl(`data/volumes/${volumeId}.json`))
       .then((response) => {
         if (!response.ok) throw new Error('not found')
@@ -88,10 +109,6 @@ export default function App() {
       })
       .then(setDetail)
       .catch(() => setError(`المجلد ${volumeId} لم يُجهَّز بعد`))
-    fetch(assetUrl(`data/ocr/${volumeId}-index.json`))
-      .then((response) => (response.ok ? response.json() : null))
-      .then(setOcr)
-      .catch(() => setOcr(null))
   }, [volumeId])
 
   useEffect(() => {
@@ -122,7 +139,7 @@ export default function App() {
   }, [page, goTo])
 
   const hits = useMemo<SearchHit[]>(() => {
-    if (!detail || !query.trim()) return []
+    if (!query.trim()) return []
     const needle = normalize(query)
     const result: SearchHit[] = []
     manifest?.books
@@ -141,25 +158,27 @@ export default function App() {
           }
         })
       })
-    ocr?.pages.forEach((item) => {
-      item.text
-        .split(/\n/)
-        .map((line) => line.trim())
-        .filter((line) => line.length > 2)
-        .forEach((line, index) => {
-          if (normalize(line).includes(needle)) {
-            result.push({
-              key: `ocr-${item.page}-${index}`,
-              title: line.slice(0, 140),
-              page: item.page,
-              volume: volumeId,
-              kind: 'index',
-            })
-          }
-        })
+    allOcr.forEach((ocr) => {
+      ocr.pages.forEach((item) => {
+        item.text
+          .split(/\n/)
+          .map((line) => line.trim())
+          .filter((line) => line.length > 2)
+          .forEach((line, index) => {
+            if (normalize(line).includes(needle)) {
+              result.push({
+                key: `ocr-${ocr.volume}-${item.page}-${index}`,
+                title: line.slice(0, 140),
+                page: item.page,
+                volume: ocr.volume,
+                kind: 'index',
+              })
+            }
+          })
+      })
     })
     return result.slice(0, 40)
-  }, [detail, manifest, volumeId, ocr, query])
+  }, [manifest, allOcr, query])
 
   const padded = String(page).padStart(4, '0')
   const thumbUrl = detail ? assetUrl(detail.imagePattern.thumb.replace('{page:04d}', padded)) : ''
@@ -169,10 +188,13 @@ export default function App() {
           .replace('{base}', FILES_BASE)
           .replace('{page:04d}', padded)
       : thumbUrl
+  const volumeNumber = /^v(\d+)$/.exec(detail?.id ?? '')?.[1]
   const downloadUrl = detail
     ? ORIGINAL_BASE
       ? `${ORIGINAL_BASE}/${detail.id}/${detail.file}`
-      : assetUrl(`original/${detail.file}`)
+      : volumeNumber
+        ? `${ARCHIVE_DOWNLOAD_BASE}/mft${volumeNumber}.pdf`
+        : 'https://archive.org/details/mft37'
     : '#'
 
   const toggleFullscreen = () => {
@@ -203,11 +225,15 @@ export default function App() {
           >
             {(manifest?.books ?? [])
               .filter((book) => book.id.startsWith('v'))
-              .map((book) => (
-                <option key={book.id} value={book.id}>
-                  {book.id.replace('v', 'المجلد ')} — {book.title.split(':')[0]}
-                </option>
-              ))}
+              .map((book) => {
+                const available = prepared.length === 0 || prepared.includes(book.id)
+                return (
+                  <option key={book.id} value={book.id} disabled={!available}>
+                    {book.id.replace('v', 'المجلد ')} — {book.title.split(':')[0]}
+                    {available ? '' : ' (قريباً)'}
+                  </option>
+                )
+              })}
           </select>
 
           <div className="search-wrap">
@@ -273,7 +299,7 @@ export default function App() {
               </button>
             ))}
             <div className="sidebar-note">
-              البحث يعمل في أسماء الأبواب وصفحات الفهرس المطبوع. الصورة الأصلية هي المرجع المعتمد.
+              البحث يعمل في أسماء الأبواب وصفحات الفهرس المطبوع في كل المجلدات المجهّزة. نتائج الفهرس تقريبية، والصورة الأصلية هي المرجع المعتمد.
             </div>
           </aside>
         )}

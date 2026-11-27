@@ -1,0 +1,39 @@
+{
+  "id": "v07",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 7",
+  "file": "07_70719-1.pdf",
+  "pages": 428,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموعة الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء السابع",
+      "page": 1
+    },
+    {
+      "level": 3,
+      "title": "كتاب الإيمان الكبير",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "كتاب الإيمان الأوسط",
+      "page": 285
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 419
+    }
+  ],
+  "indexStart": 419,
+  "indexEnd": 428,
+  "imagePattern": {
+    "thumb": "/files/v07/thumbs/p{page:04d}.webp",
+    "full": "{base}/v07/full/p{page:04d}.webp"
+  }
+}
