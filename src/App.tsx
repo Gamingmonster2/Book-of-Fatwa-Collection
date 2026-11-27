@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { MotionConfig } from 'motion/react'
 import {
+  BookOpen,
   Bookmark,
   Check,
   ChevronLeft,
@@ -120,8 +121,10 @@ export default function App() {
   const [allOcr, setAllOcr] = useState<OcrIndex[]>([])
   const [page, setPage] = useState(() => Number(initialParam('p', '1')) || 1)
   const [query, setQuery] = useState(() => initialParam('q', ''))
-  const [zoom, setZoom] = useState(1)
-  const [showToc, setShowToc] = useState(true)
+  // في الهاتف نبدأ بحجم قراءة أكبر، ونُبقي الفهرس مغلقاً حتى لا يحجب الصفحة.
+  const [isNarrow, setIsNarrow] = useState(() => window.matchMedia('(max-width: 860px)').matches)
+  const [zoom, setZoom] = useState(() => (window.matchMedia('(max-width: 860px)').matches ? 2 : 1))
+  const [showToc, setShowToc] = useState(() => !window.matchMedia('(max-width: 860px)').matches)
   const [theme, setTheme] = useState<Theme>(initialTheme)
   const [brightness, setBrightness] = useState(() => {
     const value = Number(readStorage('fatwa-brightness', 100))
@@ -183,6 +186,18 @@ export default function App() {
     if (query) params.set('q', query)
     window.history.replaceState(null, '', `?${params.toString()}`)
   }, [volumeId, page, query])
+
+  // عند تصغير النافذة إلى عرض الهاتف: أغلق الفهرس واضبط حجم القراءة تلقائياً.
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 860px)')
+    const onChange = (event: MediaQueryListEvent) => {
+      setIsNarrow(event.matches)
+      setShowToc(!event.matches)
+      setZoom(event.matches ? 2 : 1)
+    }
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [])
 
   useEffect(() => {
     const root = document.documentElement
@@ -492,13 +507,18 @@ export default function App() {
 
             <AnimatedThemeToggler theme={theme} onThemeChange={handleThemeChange} />
 
-            <button className="ghost" onClick={() => setShowToc((value) => !value)}>
+            <button
+              className="ghost"
+              onClick={() => setShowToc((value) => !value)}
+              aria-expanded={showToc}
+              aria-label={showToc ? 'إخفاء الفهرس' : 'إظهار الفهرس'}
+            >
               <List size={16} aria-hidden="true" />
-              {showToc ? 'إخفاء الفهرس' : 'إظهار الفهرس'}
+              <span className="ghost-label">{showToc ? 'إخفاء الفهرس' : 'إظهار الفهرس'}</span>
             </button>
-            <a className="ghost ghost-download" href={downloadUrl} download>
+            <a className="ghost ghost-download" href={downloadUrl} download aria-label="تحميل الملف الأصلي">
               <Download size={16} aria-hidden="true" />
-              تحميل الأصل
+              <span className="ghost-label">تحميل الأصل</span>
             </a>
           </div>
         </header>
@@ -507,8 +527,14 @@ export default function App() {
 
         <div className={`layout ${showToc ? '' : 'no-toc'}`}>
           {showToc && (
+            <button className="toc-scrim" onClick={() => setShowToc(false)} aria-label="إغلاق الفهرس" />
+          )}
+          {showToc && (
             <aside className="sidebar">
-              <h2>فهرس المجلد</h2>
+              <div className="sidebar-head">
+                <h2>فهرس المجلد</h2>
+                <button className="sidebar-close" onClick={() => setShowToc(false)} aria-label="إغلاق الفهرس">×</button>
+              </div>
               {detail?.toc.filter((item) => item.page > 0).map((item, index) => (
                 <button
                   key={`${item.title}-${index}`}
@@ -574,6 +600,16 @@ export default function App() {
 
               <div className="toolbar-tools">
                 <span className="keyboard-hint">تنقّل أيضاً بـ ← و→</span>
+
+                <button
+                  className={`tool-button toc-tool-button ${showToc ? 'active' : ''}`}
+                  onClick={() => setShowToc((value) => !value)}
+                  aria-expanded={showToc}
+                  title="فتح أو إغلاق فهرس المجلد"
+                >
+                  <List size={16} aria-hidden="true" />
+                  <span>الفهرس</span>
+                </button>
 
                 <div className="brightness-control" title="شدة إضاءة الصفحة">
                   <SlidersHorizontal size={15} aria-hidden="true" />
@@ -692,6 +728,15 @@ export default function App() {
                     </div>
                   )}
                 </div>
+
+                <button
+                  className="tool-button zoom-preset"
+                  onClick={() => setZoom((value) => (value > 1 ? 1 : isNarrow ? 2 : 1.5))}
+                  title="حجم مناسب للقراءة"
+                >
+                  <BookOpen size={16} aria-hidden="true" />
+                  <span>قراءة</span>
+                </button>
 
                 <div className="zoom-control">
                   <button onClick={() => setZoom((value) => Math.max(1, value - 0.25))} aria-label="تصغير" disabled={zoom <= 1}>
