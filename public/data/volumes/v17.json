@@ -1,0 +1,44 @@
+{
+  "id": "v17",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 17 : التفسير 4 : الإخلاص - الناس",
+  "file": "17_70724-1.pdf",
+  "pages": 298,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموعة الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء السابع عشر",
+      "page": 1
+    },
+    {
+      "level": 3,
+      "title": "سورة الإخلاص",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "سورة الفلق",
+      "page": 273
+    },
+    {
+      "level": 3,
+      "title": "سورة الناس",
+      "page": 277
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 293
+    }
+  ],
+  "indexStart": 293,
+  "indexEnd": 298,
+  "imagePattern": {
+    "thumb": "/files/v17/thumbs/p{page:04d}.webp",
+    "full": "{base}/v17/full/p{page:04d}.webp"
+  }
+}

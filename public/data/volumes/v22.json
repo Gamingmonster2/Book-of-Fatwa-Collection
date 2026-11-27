@@ -1,0 +1,59 @@
+{
+  "id": "v22",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 22 : الفقه 2 : الصلاة",
+  "file": "22_70726-2.pdf",
+  "pages": 370,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموع الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الثاني والعشرون",
+      "page": 5
+    },
+    {
+      "level": 3,
+      "title": "سئل",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "باب الأذان والإقامة",
+      "page": 41
+    },
+    {
+      "level": 3,
+      "title": "باب شروط الصلاة",
+      "page": 47
+    },
+    {
+      "level": 3,
+      "title": "باب صفة الصلاة",
+      "page": 157
+    },
+    {
+      "level": 3,
+      "title": "باب الذكر بعد الصلاة",
+      "page": 289
+    },
+    {
+      "level": 3,
+      "title": "باب ما يكره في الصلاة",
+      "page": 309
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 363
+    }
+  ],
+  "indexStart": 363,
+  "indexEnd": 370,
+  "imagePattern": {
+    "thumb": "/files/v22/thumbs/p{page:04d}.webp",
+    "full": "{base}/v22/full/p{page:04d}.webp"
+  }
+}

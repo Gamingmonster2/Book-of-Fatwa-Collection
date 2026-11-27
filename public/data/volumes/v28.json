@@ -1,0 +1,44 @@
+{
+  "id": "v28",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 28 : الفقه 8 - الجهاد",
+  "file": "28_70729-2.pdf",
+  "pages": 372,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموع الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الثامن والعشرون",
+      "page": 5
+    },
+    {
+      "level": 3,
+      "title": "سئل",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "الحسبة",
+      "page": 38
+    },
+    {
+      "level": 3,
+      "title": "السياسة الشرعية",
+      "page": 137
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 365
+    }
+  ],
+  "indexStart": 365,
+  "indexEnd": 372,
+  "imagePattern": {
+    "thumb": "/files/v28/thumbs/p{page:04d}.webp",
+    "full": "{base}/v28/full/p{page:04d}.webp"
+  }
+}

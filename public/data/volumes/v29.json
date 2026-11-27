@@ -1,0 +1,79 @@
+{
+  "id": "v29",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 29 : البيع",
+  "file": "29_70730-1.pdf",
+  "pages": 320,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموع الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء التاسع والعشرون",
+      "page": 5
+    },
+    {
+      "level": 3,
+      "title": "قواعد جامعة في عقود المعاملات والنكاح",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "باب الشروط في البيع",
+      "page": 183
+    },
+    {
+      "level": 3,
+      "title": "باب الخيار",
+      "page": 197
+    },
+    {
+      "level": 3,
+      "title": "باب الربا",
+      "page": 229
+    },
+    {
+      "level": 3,
+      "title": "باب بيع الأصول والثمار",
+      "page": 261
+    },
+    {
+      "level": 3,
+      "title": "باب السلم",
+      "page": 273
+    },
+    {
+      "level": 3,
+      "title": "باب القرض",
+      "page": 291
+    },
+    {
+      "level": 3,
+      "title": "باب الرهن",
+      "page": 295
+    },
+    {
+      "level": 3,
+      "title": "باب الضمان",
+      "page": 301
+    },
+    {
+      "level": 3,
+      "title": "باب الحوالة",
+      "page": 309
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 311
+    }
+  ],
+  "indexStart": 311,
+  "indexEnd": 320,
+  "imagePattern": {
+    "thumb": "/files/v29/thumbs/p{page:04d}.webp",
+    "full": "{base}/v29/full/p{page:04d}.webp"
+  }
+}

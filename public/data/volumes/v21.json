@@ -1,0 +1,89 @@
+{
+  "id": "v21",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 21 : الفقه 1 : الطهارة",
+  "file": "21_70726-1.pdf",
+  "pages": 368,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموع الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الحادي والعشرون",
+      "page": 1
+    },
+    {
+      "level": 3,
+      "title": "الطهارة",
+      "page": 5
+    },
+    {
+      "level": 3,
+      "title": "باب المياه",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "باب الآنية",
+      "page": 47
+    },
+    {
+      "level": 3,
+      "title": "باب الاستنجاء",
+      "page": 63
+    },
+    {
+      "level": 3,
+      "title": "باب السواك",
+      "page": 65
+    },
+    {
+      "level": 3,
+      "title": "باب الوضوء",
+      "page": 73
+    },
+    {
+      "level": 3,
+      "title": "باب المسح على الخفين",
+      "page": 101
+    },
+    {
+      "level": 3,
+      "title": "باب نواقض الوضوء",
+      "page": 127
+    },
+    {
+      "level": 3,
+      "title": "باب الغسل",
+      "page": 169
+    },
+    {
+      "level": 3,
+      "title": "باب التيمم",
+      "page": 199
+    },
+    {
+      "level": 3,
+      "title": "باب إزالة النجاسة",
+      "page": 269
+    },
+    {
+      "level": 3,
+      "title": "باب الحيض",
+      "page": 353
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 361
+    }
+  ],
+  "indexStart": 361,
+  "indexEnd": 368,
+  "imagePattern": {
+    "thumb": "/files/v21/thumbs/p{page:04d}.webp",
+    "full": "{base}/v21/full/p{page:04d}.webp"
+  }
+}

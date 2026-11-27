@@ -1,0 +1,89 @@
+{
+  "id": "v30",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 30 : الفقه 10 : الصلح - اللقطة",
+  "file": "30_70730-2.pdf",
+  "pages": 238,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموع الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الثلاثون",
+      "page": 5
+    },
+    {
+      "level": 3,
+      "title": "باب الصلح",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "باب الحجر",
+      "page": 15
+    },
+    {
+      "level": 3,
+      "title": "باب الوكالة",
+      "page": 35
+    },
+    {
+      "level": 3,
+      "title": "باب الشركة",
+      "page": 45
+    },
+    {
+      "level": 3,
+      "title": "باب المساقاة",
+      "page": 61
+    },
+    {
+      "level": 3,
+      "title": "باب الإجارة",
+      "page": 85
+    },
+    {
+      "level": 3,
+      "title": "باب العارية",
+      "page": 169
+    },
+    {
+      "level": 3,
+      "title": "باب الغصب",
+      "page": 171
+    },
+    {
+      "level": 3,
+      "title": "باب الشفعة",
+      "page": 207
+    },
+    {
+      "level": 3,
+      "title": "باب الوديعة",
+      "page": 211
+    },
+    {
+      "level": 3,
+      "title": "باب إحياء الموات",
+      "page": 217
+    },
+    {
+      "level": 3,
+      "title": "باب اللقطة",
+      "page": 223
+    },
+    {
+      "level": 3,
+      "title": "الفهرس",
+      "page": 227
+    }
+  ],
+  "indexStart": 227,
+  "indexEnd": 238,
+  "imagePattern": {
+    "thumb": "/files/v30/thumbs/p{page:04d}.webp",
+    "full": "{base}/v30/full/p{page:04d}.webp"
+  }
+}

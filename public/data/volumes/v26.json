@@ -1,0 +1,49 @@
+{
+  "id": "v26",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 26: الفقه 6 : الحج",
+  "file": "26_70728-2.pdf",
+  "pages": 172,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموع الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء السادس والعشرون",
+      "page": 5
+    },
+    {
+      "level": 3,
+      "title": "سئل",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "باب الإحرام",
+      "page": 17
+    },
+    {
+      "level": 3,
+      "title": "منسك شيخ الإسلام",
+      "page": 56
+    },
+    {
+      "level": 3,
+      "title": "باب الهدي والأضحية والعقيقة",
+      "page": 161
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 167
+    }
+  ],
+  "indexStart": 167,
+  "indexEnd": 172,
+  "imagePattern": {
+    "thumb": "/files/v26/thumbs/p{page:04d}.webp",
+    "full": "{base}/v26/full/p{page:04d}.webp"
+  }
+}

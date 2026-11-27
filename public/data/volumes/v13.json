@@ -1,0 +1,54 @@
+{
+  "id": "v13",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 13 : مقدمة التفسير",
+  "file": "13_70722-1.pdf",
+  "pages": 238,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموعة الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الثالث عشر",
+      "page": 1
+    },
+    {
+      "level": 3,
+      "title": "الفرقان بين الحق والباطل",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "رسالة في علم الباطن والظاهر",
+      "page": 124
+    },
+    {
+      "level": 3,
+      "title": "الإكليل في المتشابه والتأويل",
+      "page": 145
+    },
+    {
+      "level": 3,
+      "title": "أقسام القرآن",
+      "page": 168
+    },
+    {
+      "level": 3,
+      "title": "مقدمة التفسير",
+      "page": 176
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 231
+    }
+  ],
+  "indexStart": 231,
+  "indexEnd": 238,
+  "imagePattern": {
+    "thumb": "/files/v13/thumbs/p{page:04d}.webp",
+    "full": "{base}/v13/full/p{page:04d}.webp"
+  }
+}

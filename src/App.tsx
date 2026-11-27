@@ -1,4 +1,29 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { MotionConfig } from 'motion/react'
+import {
+  Bookmark,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Download,
+  Highlighter,
+  List,
+  Mail,
+  Maximize2,
+  MessageCircle,
+  Minus,
+  Plus,
+  Search,
+  Send,
+  Share2,
+  SlidersHorizontal,
+  Trash2,
+} from 'lucide-react'
+import { AnimatedThemeToggler, type Theme } from './components/magicui/animated-theme-toggler'
+import { AuroraText } from './components/magicui/aurora-text'
+import { BlurFade } from './components/magicui/blur-fade'
+import { ShimmerButton } from './components/magicui/shimmer-button'
 
 type TocItem = { level: number; title: string; page: number }
 type Book = {
@@ -33,6 +58,18 @@ type SearchHit = {
   volume: string
   kind: 'toc' | 'index'
 }
+type SavedBookmark = { id: string; volume: string; page: number; label: string; created: number }
+type SavedHighlight = {
+  id: string
+  volume: string
+  page: number
+  x: number
+  y: number
+  width: number
+  height: number
+  created: number
+}
+type HighlightBox = { x: number; y: number; width: number; height: number }
 
 const FILES_BASE = (import.meta.env.VITE_FILES_BASE as string | undefined)?.replace(/\/$/, '')
 const ORIGINAL_BASE = (import.meta.env.VITE_ORIGINAL_BASE as string | undefined)?.replace(/\/$/, '')
@@ -41,6 +78,15 @@ const ARCHIVE_DOWNLOAD_BASE = 'https://archive.org/download/mft37'
 
 function assetUrl(path: string): string {
   return new URL(path.replace(/^\/+/, ''), document.baseURI).href
+}
+
+function readStorage<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? (JSON.parse(raw) as T) : fallback
+  } catch {
+    return fallback
+  }
 }
 
 function normalize(value: string): string {
@@ -61,6 +107,11 @@ function initialParam(name: string, fallback: string): string {
   return new URLSearchParams(window.location.search).get(name) || fallback
 }
 
+function initialTheme(): Theme {
+  const value = document.documentElement.dataset.theme
+  return value === 'dark' || value === 'sepia' ? value : 'light'
+}
+
 export default function App() {
   const [manifest, setManifest] = useState<Manifest | null>(null)
   const [volumeId, setVolumeId] = useState(() => initialParam('v', 'v01'))
@@ -71,8 +122,22 @@ export default function App() {
   const [query, setQuery] = useState(() => initialParam('q', ''))
   const [zoom, setZoom] = useState(1)
   const [showToc, setShowToc] = useState(true)
+  const [theme, setTheme] = useState<Theme>(initialTheme)
+  const [brightness, setBrightness] = useState(() => {
+    const value = Number(readStorage('fatwa-brightness', 100))
+    return Number.isFinite(value) ? Math.min(140, Math.max(60, value)) : 100
+  })
+  const [bookmarks, setBookmarks] = useState<SavedBookmark[]>(() => readStorage('fatwa-bookmarks', []))
+  const [highlights, setHighlights] = useState<SavedHighlight[]>(() => readStorage('fatwa-highlights', []))
+  const [showBookmarks, setShowBookmarks] = useState(false)
+  const [showShare, setShowShare] = useState(false)
+  const [highlightMode, setHighlightMode] = useState(false)
+  const [draftHighlight, setDraftHighlight] = useState<HighlightBox | null>(null)
+  const [copied, setCopied] = useState(false)
   const [error, setError] = useState('')
   const readerRef = useRef<HTMLDivElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const highlightStartRef = useRef<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     fetch(assetUrl('data/manifest.json'))
@@ -119,10 +184,54 @@ export default function App() {
     window.history.replaceState(null, '', `?${params.toString()}`)
   }, [volumeId, page, query])
 
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('dark', theme === 'dark')
+    root.classList.toggle('sepia', theme === 'sepia')
+    root.dataset.theme = theme
+    root.style.colorScheme = theme === 'dark' ? 'dark' : 'light'
+    document.querySelector('meta[name="theme-color"]')?.setAttribute(
+      'content',
+      theme === 'dark' ? '#071713' : theme === 'sepia' ? '#4c4a30' : '#f4f6f5',
+    )
+    try {
+      localStorage.setItem('theme', theme)
+    } catch {
+      // التخزين قد يكون معطلاً؛ الوضع يعمل داخل الجلسة.
+    }
+  }, [theme])
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--page-brightness', (brightness / 100).toFixed(2))
+    try {
+      localStorage.setItem('fatwa-brightness', String(brightness))
+    } catch {
+      // تجاهل تعطيل التخزين.
+    }
+  }, [brightness])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('fatwa-bookmarks', JSON.stringify(bookmarks))
+    } catch {
+      // تجاهل تعطيل التخزين.
+    }
+  }, [bookmarks])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('fatwa-highlights', JSON.stringify(highlights))
+    } catch {
+      // تجاهل تعطيل التخزين.
+    }
+  }, [highlights])
+
   const goTo = useCallback(
     (target: number) => {
       if (!detail) return
       setPage(Math.min(detail.pages, Math.max(1, target)))
+      setHighlightMode(false)
+      setDraftHighlight(null)
       readerRef.current?.scrollTo({ top: 0 })
     },
     [detail],
@@ -131,8 +240,8 @@ export default function App() {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) return
-      if (event.key === 'ArrowLeft') goTo(page - 1)
-      if (event.key === 'ArrowRight') goTo(page + 1)
+      if (event.key === 'ArrowLeft') goTo(page + 1)
+      if (event.key === 'ArrowRight') goTo(page - 1)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -180,6 +289,8 @@ export default function App() {
     return result.slice(0, 40)
   }, [manifest, allOcr, query])
 
+  const handleThemeChange = useCallback((next: Theme) => setTheme(next), [])
+
   const padded = String(page).padStart(4, '0')
   const thumbUrl = detail ? assetUrl(detail.imagePattern.thumb.replace('{page:04d}', padded)) : ''
   const fullUrl =
@@ -197,158 +308,487 @@ export default function App() {
         : 'https://archive.org/details/mft37'
     : '#'
 
-  const toggleFullscreen = () => {
-    if (document.fullscreenElement) void document.exitFullscreen()
-    else void readerRef.current?.requestFullscreen()
+  const canPrev = page > 1
+  const canNext = !!detail && page < detail.pages
+  const shareUrl = `${window.location.origin}${window.location.pathname}?v=${volumeId}&p=${page}`
+  const shareText = `صفحة ${page} من ${detail?.title ?? 'موسوعة الفتاوى'}`
+  const shareLinks = [
+    { label: 'الإيميل', icon: Mail, href: `mailto:?subject=${encodeURIComponent(shareText)}&body=${encodeURIComponent(`${shareText}\n${shareUrl}`)}` },
+    { label: 'واتساب', icon: MessageCircle, href: `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}` },
+    { label: 'إكس', icon: Send, href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}` },
+    { label: 'فيسبوك', icon: Share2, href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}` },
+  ]
+
+  const saveBookmark = () => {
+    if (!detail) return
+    setBookmarks((items) =>
+      [
+        {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          volume: volumeId,
+          page,
+          label: `المجلد ${volumeNumber ?? volumeId.replace('v', '')} · صفحة ${page}`,
+          created: Date.now(),
+        },
+        ...items,
+      ].slice(0, 60),
+    )
+    setShowBookmarks(true)
+    setShowShare(false)
   }
 
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+    } catch {
+      const input = document.createElement('textarea')
+      input.value = shareUrl
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      input.remove()
+    }
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1800)
+  }
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen()
+    else void stageRef.current?.requestFullscreen()
+  }
+
+  const pointFromEvent = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    return {
+      x: Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width)),
+      y: Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height)),
+    }
+  }
+
+  const onHighlightDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!highlightMode || !detail) return
+    const point = pointFromEvent(event)
+    highlightStartRef.current = point
+    setDraftHighlight({ ...point, width: 0, height: 0 })
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const onHighlightMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const start = highlightStartRef.current
+    if (!start) return
+    const point = pointFromEvent(event)
+    setDraftHighlight({
+      x: Math.min(start.x, point.x),
+      y: Math.min(start.y, point.y),
+      width: Math.abs(point.x - start.x),
+      height: Math.abs(point.y - start.y),
+    })
+  }
+
+  const onHighlightUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const start = highlightStartRef.current
+    if (!start) return
+    const point = pointFromEvent(event)
+    const box: HighlightBox = {
+      x: Math.min(start.x, point.x),
+      y: Math.min(start.y, point.y),
+      width: Math.abs(point.x - start.x),
+      height: Math.abs(point.y - start.y),
+    }
+    if (box.width > 0.015 && box.height > 0.015) {
+      setHighlights((items) => [
+        ...items,
+        {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          volume: volumeId,
+          page,
+          ...box,
+          created: Date.now(),
+        },
+      ])
+    }
+    highlightStartRef.current = null
+    setDraftHighlight(null)
+    setHighlightMode(false)
+    event.currentTarget.releasePointerCapture(event.pointerId)
+  }
+
+  const currentHighlights = highlights.filter((item) => item.volume === volumeId && item.page === page)
+
   return (
-    <div className="app">
-      <header className="topbar">
-        <div className="brand">
-          <span className="brand-mark">ف</span>
-          <div>
-            <h1>موسوعة الفتاوى</h1>
-            <p>مجموعة فتاوى شيخ الإسلام ابن تيمية</p>
-          </div>
-        </div>
+    <MotionConfig reducedMotion="user">
+      <div className="app">
+        <header className="topbar">
+          <BlurFade className="brand-wrap">
+            <div className="brand">
+              <span className="brand-mark" aria-hidden="true">ف</span>
+              <div>
+                <AuroraText className="brand-title">موسوعة الفتاوى</AuroraText>
+                <p>مجموعة فتاوى شيخ الإسلام ابن تيمية</p>
+              </div>
+            </div>
+          </BlurFade>
 
-        <div className="controls">
-          <select
-            aria-label="اختر المجلد"
-            value={volumeId}
-            onChange={(event) => {
-              setVolumeId(event.target.value)
-              setPage(1)
-              setQuery('')
-            }}
-          >
-            {(manifest?.books ?? [])
-              .filter((book) => book.id.startsWith('v'))
-              .map((book) => {
-                const available = prepared.length === 0 || prepared.includes(book.id)
-                return (
-                  <option key={book.id} value={book.id} disabled={!available}>
-                    {book.id.replace('v', 'المجلد ')} — {book.title.split(':')[0]}
-                    {available ? '' : ' (قريباً)'}
-                  </option>
-                )
-              })}
-          </select>
+          <div className="controls">
+            <select
+              aria-label="اختر المجلد"
+              value={volumeId}
+              onChange={(event) => {
+                setVolumeId(event.target.value)
+                setPage(1)
+                setQuery('')
+              }}
+            >
+              {(manifest?.books ?? [])
+                .filter((book) => book.id.startsWith('v'))
+                .map((book) => {
+                  const available = prepared.length === 0 || prepared.includes(book.id)
+                  return (
+                    <option key={book.id} value={book.id} disabled={!available}>
+                      {book.id.replace('v', 'المجلد ')} — {book.title.split(':')[0]}
+                      {available ? '' : ' (قريباً)'}
+                    </option>
+                  )
+                })}
+            </select>
 
-          <div className="search-wrap">
-            <input
-              type="search"
-              value={query}
-              placeholder="ابحث في الفهرس والأبواب…"
-              onChange={(event) => setQuery(event.target.value)}
-              aria-label="البحث"
-            />
-            {query && (
-              <div className="search-results">
-                <div className="results-head">
-                  {hits.length ? `${hits.length} نتيجة` : 'لا نتائج — جرّب كلمة من الفهرس'}
+            <div className="search-wrap">
+              <Search className="search-icon" size={16} aria-hidden="true" />
+              <input
+                type="search"
+                value={query}
+                placeholder="ابحث في الفهرس والأبواب…"
+                onChange={(event) => setQuery(event.target.value)}
+                aria-label="البحث"
+              />
+              {query && (
+                <div className="search-results">
+                  <div className="results-head">
+                    {hits.length ? `${hits.length} نتيجة` : 'لا نتائج — جرّب كلمة من الفهرس'}
+                  </div>
+                  {hits.map((hit) => (
+                    <button
+                      key={hit.key}
+                      onClick={() => {
+                        if (hit.volume !== volumeId) {
+                          setVolumeId(hit.volume)
+                          setPage(hit.page)
+                        } else {
+                          goTo(hit.page)
+                        }
+                        setQuery('')
+                      }}
+                    >
+                      <span className={`badge ${hit.kind}`}>
+                        {hit.kind === 'toc' ? `ج${hit.volume.replace('v', '')}` : 'فهرس'}
+                      </span>
+                      <span className="hit-title">{hit.title}</span>
+                      <span className="hit-page">ص {hit.page}</span>
+                    </button>
+                  ))}
                 </div>
-                {hits.map((hit) => (
+              )}
+            </div>
+
+            <AnimatedThemeToggler theme={theme} onThemeChange={handleThemeChange} />
+
+            <button className="ghost" onClick={() => setShowToc((value) => !value)}>
+              <List size={16} aria-hidden="true" />
+              {showToc ? 'إخفاء الفهرس' : 'إظهار الفهرس'}
+            </button>
+            <a className="ghost ghost-download" href={downloadUrl} download>
+              <Download size={16} aria-hidden="true" />
+              تحميل الأصل
+            </a>
+          </div>
+        </header>
+
+        {error && <div className="error">{error}</div>}
+
+        <div className={`layout ${showToc ? '' : 'no-toc'}`}>
+          {showToc && (
+            <aside className="sidebar">
+              <h2>فهرس المجلد</h2>
+              {detail?.toc.filter((item) => item.page > 0).map((item, index) => (
+                <button
+                  key={`${item.title}-${index}`}
+                  className={`toc-item depth-${Math.min(item.level, 3)} ${item.page === page ? 'active' : ''}`}
+                  onClick={() => goTo(item.page)}
+                >
+                  <span>{item.title}</span>
+                  <small>{item.page}</small>
+                </button>
+              ))}
+              <div className="sidebar-note">
+                البحث يعمل في أسماء الأبواب وصفحات الفهرس المطبوع في كل المجلدات المجهّزة. نتائج الفهرس تقريبية، والصورة الأصلية هي المرجع المعتمد.
+              </div>
+            </aside>
+          )}
+
+          <main className="reader-area">
+            <div className="reader-toolbar">
+              <div className="reader-nav">
+                <ShimmerButton
+                  className="nav-button"
+                  onClick={() => goTo(page - 1)}
+                  disabled={!canPrev}
+                  aria-label="الصفحة السابقة"
+                >
+                  <ChevronRight size={22} strokeWidth={2.4} aria-hidden="true" />
+                  <span className="nav-button__text">
+                    <strong>السابق</strong>
+                    <small>{canPrev ? `صفحة ${page - 1}` : 'أول صفحة'}</small>
+                  </span>
+                  <kbd>→</kbd>
+                </ShimmerButton>
+
+                <div className="page-input">
+                  <span>صفحة</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={detail?.pages ?? 1}
+                    value={page}
+                    onChange={(event) => goTo(Number(event.target.value) || 1)}
+                    aria-label="رقم الصفحة"
+                  />
+                  <span>/ {detail?.pages ?? '—'}</span>
+                </div>
+
+                <ShimmerButton
+                  className="nav-button"
+                  onClick={() => goTo(page + 1)}
+                  disabled={!canNext}
+                  aria-label="الصفحة التالية"
+                >
+                  <ChevronLeft size={22} strokeWidth={2.4} aria-hidden="true" />
+                  <span className="nav-button__text">
+                    <strong>التالي</strong>
+                    <small>{canNext ? `صفحة ${page + 1}` : 'آخر صفحة'}</small>
+                  </span>
+                  <kbd>←</kbd>
+                </ShimmerButton>
+              </div>
+
+              <span className="spacer" />
+
+              <div className="toolbar-tools">
+                <span className="keyboard-hint">تنقّل أيضاً بـ ← و→</span>
+
+                <div className="brightness-control" title="شدة إضاءة الصفحة">
+                  <SlidersHorizontal size={15} aria-hidden="true" />
+                  <input
+                    type="range"
+                    min={60}
+                    max={140}
+                    value={brightness}
+                    onChange={(event) => setBrightness(Number(event.target.value))}
+                    aria-label="شدة إضاءة الصفحة"
+                  />
+                  <span>{brightness}%</span>
+                </div>
+
+                <button
+                  className={`tool-button ${highlightMode ? 'active' : ''}`}
+                  onClick={() => setHighlightMode((value) => !value)}
+                  title="اسحب على الصورة لتظليل جزء منها"
+                >
+                  <Highlighter size={16} aria-hidden="true" />
+                  <span>تظليل</span>
+                </button>
+
+                <div className="popover-wrap">
                   <button
-                    key={hit.key}
+                    className={`tool-button ${showBookmarks ? 'active' : ''}`}
                     onClick={() => {
-                      if (hit.volume !== volumeId) {
-                        setVolumeId(hit.volume)
-                        setPage(hit.page)
-                      } else {
-                        goTo(hit.page)
-                      }
-                      setQuery('')
+                      setShowBookmarks((value) => !value)
+                      setShowShare(false)
+                    }}
+                    title="المراجع المحفوظة"
+                  >
+                    <Bookmark size={16} aria-hidden="true" />
+                    <span>مراجعي</span>
+                    {bookmarks.length > 0 && <b>{bookmarks.length}</b>}
+                  </button>
+                  {showBookmarks && (
+                    <div className="popover bookmarks-popover">
+                      <div className="popover-head">
+                        <strong>المراجع المحفوظة</strong>
+                        <button className="popover-close" onClick={() => setShowBookmarks(false)} aria-label="إغلاق">×</button>
+                      </div>
+                      <button className="popover-action" onClick={saveBookmark} disabled={!detail}>
+                        <Bookmark size={15} aria-hidden="true" />
+                        حفظ هذه الصفحة
+                      </button>
+                      <div className="bookmark-list">
+                        {bookmarks.length === 0 && <p className="popover-empty">لم تحفظ أي مرجع بعد.</p>}
+                        {bookmarks.map((item) => (
+                          <div className="bookmark-row" key={item.id}>
+                            <button
+                              onClick={() => {
+                                setVolumeId(item.volume)
+                                setPage(item.page)
+                                setShowBookmarks(false)
+                              }}
+                            >
+                              <span>{item.label}</span>
+                              <small>ج{item.volume.replace('v', '')}</small>
+                            </button>
+                            <button
+                              className="row-delete"
+                              onClick={() => setBookmarks((items) => items.filter((entry) => entry.id !== item.id))}
+                              aria-label="حذف المرجع"
+                            >
+                              <Trash2 size={14} aria-hidden="true" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="popover-wrap">
+                  <button
+                    className={`tool-button ${showShare ? 'active' : ''}`}
+                    onClick={() => {
+                      setShowShare((value) => !value)
+                      setShowBookmarks(false)
+                    }}
+                    title="مشاركة الصفحة"
+                  >
+                    <Share2 size={16} aria-hidden="true" />
+                    <span>مشاركة</span>
+                  </button>
+                  {showShare && (
+                    <div className="popover share-popover">
+                      <div className="popover-head">
+                        <strong>مشاركة هذه الصفحة</strong>
+                        <button className="popover-close" onClick={() => setShowShare(false)} aria-label="إغلاق">×</button>
+                      </div>
+                      <button className="popover-action" onClick={() => void copyLink()}>
+                        {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
+                        {copied ? 'تم نسخ الرابط' : 'نسخ الرابط'}
+                      </button>
+                      {'share' in navigator && (
+                        <button
+                          className="popover-action"
+                          onClick={() => {
+                            void navigator.share({ title: shareText, url: shareUrl }).catch(() => {})
+                          }}
+                        >
+                          <Share2 size={15} aria-hidden="true" />
+                          مشاركة الجهاز
+                        </button>
+                      )}
+                      <div className="share-links">
+                        {shareLinks.map(({ label, icon: Icon, href }) => (
+                          <a key={label} href={href} target="_blank" rel="noreferrer">
+                            <Icon size={15} aria-hidden="true" />
+                            {label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="zoom-control">
+                  <button onClick={() => setZoom((value) => Math.max(1, value - 0.25))} aria-label="تصغير" disabled={zoom <= 1}>
+                    <Minus size={16} aria-hidden="true" />
+                  </button>
+                  <span className="zoom-label">{Math.round(zoom * 100)}%</span>
+                  <button onClick={() => setZoom((value) => Math.min(3, value + 0.25))} aria-label="تكبير" disabled={zoom >= 3}>
+                    <Plus size={16} aria-hidden="true" />
+                  </button>
+                </div>
+                <button className="tool-button" onClick={toggleFullscreen} title="ملء الشاشة">
+                  <Maximize2 size={16} aria-hidden="true" />
+                  <span>ملء الشاشة</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="stage" ref={stageRef}>
+              {highlightMode && <div className="highlight-hint">اسحب على الصورة لتظليل الموضع الذي تريد العودة إليه</div>}
+              <div className="page-scroll" ref={readerRef}>
+                {detail ? (
+                  <div
+                    className={`page-frame ${highlightMode ? 'highlighting' : ''}`}
+                    style={{ width: `${zoom * 100}%`, maxWidth: zoom > 1 ? 'none' : undefined }}
+                    onPointerDown={onHighlightDown}
+                    onPointerMove={onHighlightMove}
+                    onPointerUp={onHighlightUp}
+                    onPointerCancel={() => {
+                      highlightStartRef.current = null
+                      setDraftHighlight(null)
                     }}
                   >
-                    <span className={`badge ${hit.kind}`}>
-                      {hit.kind === 'toc' ? `ج${hit.volume.replace('v', '')}` : 'فهرس'}
-                    </span>
-                    <span className="hit-title">{hit.title}</span>
-                    <span className="hit-page">ص {hit.page}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <button className="ghost" onClick={() => setShowToc((value) => !value)}>
-            {showToc ? 'إخفاء الفهرس' : 'إظهار الفهرس'}
-          </button>
-          <a className="ghost" href={downloadUrl} download>
-            تحميل الأصل
-          </a>
-        </div>
-      </header>
-
-      {error && <div className="error">{error}</div>}
-
-      <div className={`layout ${showToc ? '' : 'no-toc'}`}>
-        {showToc && (
-          <aside className="sidebar">
-            <h2>فهرس المجلد</h2>
-            {detail?.toc.filter((item) => item.page > 0).map((item, index) => (
-              <button
-                key={`${item.title}-${index}`}
-                className={`toc-item depth-${Math.min(item.level, 3)} ${item.page === page ? 'active' : ''}`}
-                onClick={() => goTo(item.page)}
-              >
-                <span>{item.title}</span>
-                <small>{item.page}</small>
-              </button>
-            ))}
-            <div className="sidebar-note">
-              البحث يعمل في أسماء الأبواب وصفحات الفهرس المطبوع في كل المجلدات المجهّزة. نتائج الفهرس تقريبية، والصورة الأصلية هي المرجع المعتمد.
-            </div>
-          </aside>
-        )}
-
-        <main className="reader-area">
-          <div className="reader-toolbar">
-            <button onClick={() => goTo(page - 1)} disabled={page <= 1}>
-              السابق ‹
-            </button>
-            <div className="page-input">
-              <input
-                type="number"
-                min={1}
-                max={detail?.pages ?? 1}
-                value={page}
-                onChange={(event) => goTo(Number(event.target.value) || 1)}
-                aria-label="رقم الصفحة"
-              />
-              <span>/ {detail?.pages ?? '—'}</span>
-            </div>
-            <button onClick={() => goTo(page + 1)} disabled={!!detail && page >= detail.pages}>
-              › التالي
-            </button>
-            <span className="spacer" />
-            <button onClick={() => setZoom((value) => Math.max(1, value - 0.25))}>−</button>
-            <span className="zoom-label">{Math.round(zoom * 100)}%</span>
-            <button onClick={() => setZoom((value) => Math.min(3, value + 0.25))}>＋</button>
-            <button onClick={toggleFullscreen}>ملء الشاشة</button>
-          </div>
-
-          <div className="page-scroll" ref={readerRef}>
-            {detail ? (
-              <div className="page-frame" style={{ width: `${zoom * 100}%` }}>
-                <img src={zoom > 1 ? fullUrl : thumbUrl} alt={`صفحة ${page} من ${detail.title}`} />
-                {zoom > 1 && !FILES_BASE && (
-                  <div className="zoom-hint">الصورة المصغّرة معروضة؛ اضبط VITE_FILES_BASE للصور الكاملة.</div>
+                    <img src={zoom > 1 ? fullUrl : thumbUrl} alt={`صفحة ${page} من ${detail.title}`} draggable={false} />
+                    <div className="highlight-overlay">
+                      {currentHighlights.map((item) => (
+                        <button
+                          key={item.id}
+                          className="highlight-box"
+                          style={{ left: `${item.x * 100}%`, top: `${item.y * 100}%`, width: `${item.width * 100}%`, height: `${item.height * 100}%` }}
+                          onClick={() => setHighlights((items) => items.filter((entry) => entry.id !== item.id))}
+                          onPointerDown={(event) => event.stopPropagation()}
+                          title="اضغط لإزالة التظليل"
+                          aria-label="إزالة التظليل"
+                        />
+                      ))}
+                      {draftHighlight && (
+                        <div
+                          className="highlight-box draft"
+                          style={{ left: `${draftHighlight.x * 100}%`, top: `${draftHighlight.y * 100}%`, width: `${draftHighlight.width * 100}%`, height: `${draftHighlight.height * 100}%` }}
+                        />
+                      )}
+                    </div>
+                    {zoom > 1 && !FILES_BASE && (
+                      <div className="zoom-hint">الصورة المصغّرة معروضة؛ اضبط VITE_FILES_BASE للصور الكاملة.</div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="loading">جارٍ تحميل المجلد…</div>
                 )}
               </div>
-            ) : (
-              <div className="loading">جارٍ تحميل المجلد…</div>
-            )}
-          </div>
-        </main>
-      </div>
 
-      <footer>
-        <span>{manifest?.source ?? ''}</span>
-        <span>{manifest?.total_pages?.toLocaleString('ar') ?? ''} صفحة في الموسوعة</span>
-      </footer>
-    </div>
+              <div className="floating-nav" role="group" aria-label="التنقل السريع بين الصفحات">
+                <button
+                  className="floating-nav__button"
+                  onClick={() => goTo(page - 1)}
+                  disabled={!canPrev}
+                  aria-label="الصفحة السابقة"
+                >
+                  <ChevronRight size={26} strokeWidth={2.5} aria-hidden="true" />
+                  <span>السابق</span>
+                  <small>{canPrev ? `ص ${page - 1}` : 'الأولى'}</small>
+                </button>
+                <div className="floating-nav__center" aria-live="polite">
+                  <span>صفحة</span>
+                  <strong>{page}</strong>
+                  <span>من {detail?.pages ?? '—'}</span>
+                </div>
+                <button
+                  className="floating-nav__button"
+                  onClick={() => goTo(page + 1)}
+                  disabled={!canNext}
+                  aria-label="الصفحة التالية"
+                >
+                  <ChevronLeft size={26} strokeWidth={2.5} aria-hidden="true" />
+                  <span>التالي</span>
+                  <small>{canNext ? `ص ${page + 1}` : 'الأخيرة'}</small>
+                </button>
+              </div>
+            </div>
+          </main>
+        </div>
+
+        <footer>
+          <span>{manifest?.source ?? ''}</span>
+          <span>{manifest?.total_pages?.toLocaleString('ar') ?? ''} صفحة في الموسوعة</span>
+        </footer>
+      </div>
+    </MotionConfig>
   )
 }

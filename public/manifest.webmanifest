@@ -1,0 +1,13 @@
+{
+  "name": "موسوعة الفتاوى — مجموعة فتاوى شيخ الإسلام ابن تيمية",
+  "short_name": "موسوعة الفتاوى",
+  "description": "مكتبة رقمية لقراءة مجموعة فتاوى شيخ الإسلام ابن تيمية من صورها الأصلية مع فهارس أبواب وبحث سريع.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f6f5",
+  "theme_color": "#0f3a30"
+}

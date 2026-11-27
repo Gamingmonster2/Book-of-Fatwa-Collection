@@ -1,0 +1,34 @@
+{
+  "id": "v12",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 12 : القرآن كلام الله حقيقة",
+  "file": "12_70721-2.pdf",
+  "pages": 331,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموعة الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الثاني عشر",
+      "page": 1
+    },
+    {
+      "level": 3,
+      "title": "قاعدة عامة في القرآن وكلام الله",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 325
+    }
+  ],
+  "indexStart": 325,
+  "indexEnd": 331,
+  "imagePattern": {
+    "thumb": "/files/v12/thumbs/p{page:04d}.webp",
+    "full": "{base}/v12/full/p{page:04d}.webp"
+  }
+}

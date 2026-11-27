@@ -11,6 +11,8 @@
     "ocr:index": "node scripts/ocr-index.mjs"
   },
   "dependencies": {
+    "lucide-react": "^1.82.0",
+    "motion": "^14.14.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

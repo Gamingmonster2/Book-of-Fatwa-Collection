@@ -1,0 +1,49 @@
+{
+  "id": "v23",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 23 : الفقه 3 : تابع الصلاة",
+  "file": "23_70727-1.pdf",
+  "pages": 240,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموع الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الثالث والعشرون",
+      "page": 3
+    },
+    {
+      "level": 3,
+      "title": "باب سجود السهو",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "باب صلاة التطوع",
+      "page": 35
+    },
+    {
+      "level": 3,
+      "title": "باب صلاة الجماعة",
+      "page": 129
+    },
+    {
+      "level": 3,
+      "title": "باب الإمامة",
+      "page": 193
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 235
+    }
+  ],
+  "indexStart": 235,
+  "indexEnd": 240,
+  "imagePattern": {
+    "thumb": "/files/v23/thumbs/p{page:04d}.webp",
+    "full": "{base}/v23/full/p{page:04d}.webp"
+  }
+}

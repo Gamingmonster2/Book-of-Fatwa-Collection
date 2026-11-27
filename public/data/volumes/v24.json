@@ -1,0 +1,59 @@
+{
+  "id": "v24",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 24 : الفقه 4 : تابع الصلاة - الجنائز",
+  "file": "24_70727-2.pdf",
+  "pages": 219,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموع الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الرابع والعشرون",
+      "page": 5
+    },
+    {
+      "level": 3,
+      "title": "باب صلاة أهل الأعذار",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "باب صلاة الجمعة",
+      "page": 91
+    },
+    {
+      "level": 3,
+      "title": "باب صلاة العيدين",
+      "page": 119
+    },
+    {
+      "level": 3,
+      "title": "باب صلاة الكسوف",
+      "page": 139
+    },
+    {
+      "level": 3,
+      "title": "كتاب الجنائز",
+      "page": 147
+    },
+    {
+      "level": 3,
+      "title": "باب زيارة القبور",
+      "page": 183
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 215
+    }
+  ],
+  "indexStart": 215,
+  "indexEnd": 219,
+  "imagePattern": {
+    "thumb": "/files/v24/thumbs/p{page:04d}.webp",
+    "full": "{base}/v24/full/p{page:04d}.webp"
+  }
+}

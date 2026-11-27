@@ -1,0 +1,44 @@
+{
+  "id": "v18",
+  "title": "مجموعة الفتاوى لشيخ الإسلام ابن تيمية - ج 18 : الحديث",
+  "file": "18_70724-2.pdf",
+  "pages": 228,
+  "toc": [
+    {
+      "level": 1,
+      "title": "مجموعة الفتاوى",
+      "page": -1
+    },
+    {
+      "level": 2,
+      "title": "الجزء الثامن عشر",
+      "page": 1
+    },
+    {
+      "level": 3,
+      "title": "الحديث تعريفه وأقسامه",
+      "page": 7
+    },
+    {
+      "level": 3,
+      "title": "الأربعون حديثاً التي رواها الإمام بالسند",
+      "page": 46
+    },
+    {
+      "level": 3,
+      "title": "شرح حديث إنما الأعمال بالنيات",
+      "page": 138
+    },
+    {
+      "level": 3,
+      "title": "فهرس",
+      "page": 223
+    }
+  ],
+  "indexStart": 223,
+  "indexEnd": 228,
+  "imagePattern": {
+    "thumb": "/files/v18/thumbs/p{page:04d}.webp",
+    "full": "{base}/v18/full/p{page:04d}.webp"
+  }
+}
